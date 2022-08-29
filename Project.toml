@@ -1,0 +1,7 @@
+name = "HPIPM"
+uuid = "aa97a45c-cc5b-46b9-8cf5-77c2917b28bf"
+authors = ["Brian Jackson <bjack205@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
