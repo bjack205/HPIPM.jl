@@ -103,6 +103,7 @@ HPIPM.ocp_qp_create(dim, qp, qp_mem)
 HPIPM.ocp_qp_set_all(AA, BB, bb, QQ, SS, RR, qq, rr, iidxbx, llbx, uubx, iidxbu, llbu, uubu, 
   CC, DD, llg, uug, ZZl, ZZu, zzl, zzu, iidxs, llls, llus, qp
 )
+qp.dim
 
 ## QP sol 
 qp_sol_size = HPIPM.ocp_qp_sol_memsize(dim)
@@ -116,7 +117,6 @@ ipm_arg_mem = zeros(UInt8, ipm_arg_size)
 arg = HPIPM.ocp_qp_ipm_arg()
 HPIPM.ocp_qp_ipm_arg_create(dim, arg, ipm_arg_mem)
 HPIPM.ocp_qp_ipm_arg_set_default(HPIPM.SPEED, arg)
-
 HPIPM.ocp_qp_ipm_arg_set_mu0(mu0, arg)
 HPIPM.ocp_qp_ipm_arg_set_iter_max(iter_max, arg)
 HPIPM.ocp_qp_ipm_arg_set_alpha_min(alpha_min, arg)
@@ -131,7 +131,36 @@ HPIPM.ocp_qp_ipm_arg_set_ric_alg(ric_alg, arg)
 HPIPM.ocp_qp_ipm_arg_set_split_step(split_step, arg)
 
 ## IPM workspace
+ipm_strsize = Int(HPIPM.ocp_qp_ipm_ws_strsize())
 ipm_size = HPIPM.ocp_qp_ipm_ws_memsize(dim, arg)
 ipm_mem = zeros(UInt8, ipm_size)
 workspace = HPIPM.ocp_qp_ipm_ws()
 HPIPM.ocp_qp_ipm_ws_create(dim, arg, workspace, ipm_mem)
+
+# ## Codegen
+# HPIPM.ocp_qp_dim_codegen("test_d_ocp_data_jl.c", "w", dim)
+# HPIPM.ocp_qp_codegen("test_d_ocp_data_jl.c", "a", dim, qp)
+# HPIPM.ocp_qp_ipm_arg_codegen("test_d_ocp_data_jl.c", "a", dim, arg)
+
+## Solve
+HPIPM.ocp_qp_ipm_solve(qp, qp_sol, arg, workspace)
+status = HPIPM.ocp_qp_ipm_get_status(workspace)
+println("Status = ", status)
+workspace.iter
+iters = HPIPM.ocp_qp_ipm_get_iter(workspace)
+obj = HPIPM.ocp_qp_ipm_get_obj(workspace)
+res = HPIPM.ocp_qp_ipm_get_max_res_stat(workspace)
+HPIPM.ocp_qp_ipm_get_obj(workspace)
+println("Got $iters iters in Julia")
+println("Got $obj objective value")
+println("Stat res = $res")
+
+# ##
+# u = zeros(1)
+# HPIPM.ocp_qp_sol_get_u(0, qp_sol, u)
+# u
+# HPIPM.ocp_qp_ipm_get_max_res_stat(workspace)
+# HPIPM.ocp_qp_ipm_get_max_res_eq(workspace)
+# HPIPM.ocp_qp_ipm_get_max_res_ineq(workspace)
+# HPIPM.ocp_qp_ipm_get_max_res_comp(workspace)
+# HPIPM.ocp_qp_ipm_get_obj(workspace)

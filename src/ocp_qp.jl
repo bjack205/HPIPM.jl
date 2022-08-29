@@ -62,3 +62,17 @@ function ocp_qp_set_all(A, B, b, Q, S, R, q, r, idxbx, lbx, ubx, idxbu, lbu, ubu
         zl, zu, idxs, ls, us, qp
     )
 end
+
+function ocp_qp_codegen(file_name::String, mode::String, qp_dim::ocp_qp_dim, qp::ocp_qp)
+    ccall(("d_ocp_qp_codegen", libhpipm), Cvoid,
+        (Cstring, Cstring, Ref{ocp_qp_dim}, Ref{ocp_qp}),
+        file_name, mode, qp_dim, qp
+    )
+end
+
+function ocp_qp_print(qp_dim::ocp_qp_dim, qp::ocp_qp)
+    ccall(("d_ocp_qp_print", libhpipm), Cvoid,
+        (Ref{ocp_qp_dim}, Ref{ocp_qp}),
+        qp_dim, qp 
+    )
+end

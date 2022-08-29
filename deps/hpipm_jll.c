@@ -47,3 +47,9 @@ void create_ocp_qp_dim(struct d_ocp_qp_dim *dim, int N, uint8_t *memory) {
 void set_dim_length(struct d_ocp_qp_dim *dim, int N) {
   dim->N = N;
 }
+
+void set_memsize(struct d_ocp_qp_ipm_ws *ws) {
+  puts("Setting to 100");
+  ws->qp_res[0] = 200;
+  ws->memsize = 100;
+}

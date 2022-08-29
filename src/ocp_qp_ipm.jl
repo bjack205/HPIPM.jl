@@ -60,7 +60,7 @@ function ocp_qp_ipm_arg_set_default(mode::hpipm_mode, arg::ocp_qp_ipm_arg)
 end
 
 for arg in (
-        :iter_max, :alpha_min, :mu0, :tol_stat, :tol_eq, :tol_ineq, :tol_comp, 
+        :alpha_min, :mu0, :tol_stat, :tol_eq, :tol_ineq, :tol_comp, 
         :reg_prim, :lam_min, :t_min, :tau_min
     )
     method = "ocp_qp_ipm_arg_set_" * string(arg)
@@ -72,7 +72,7 @@ for arg in (
     end
 end
 for arg in (
-        :warm_start, :pred_corr, :cond_pred_corr, :ric_alg, :comp_dual_sol_eq, :comp_res_pred, 
+        :iter_max, :warm_start, :pred_corr, :cond_pred_corr, :ric_alg, :comp_dual_sol_eq, :comp_res_pred, 
         :split_step, :var_init_scheme, :t_lam_min
     )
     method = "ocp_qp_ipm_arg_set_" * string(arg)
@@ -84,16 +84,29 @@ for arg in (
     end
 end
 
+function ocp_qp_ipm_arg_codegen(file_name::String, mode::String, qp_dim::ocp_qp_dim, arg::ocp_qp_ipm_arg)
+    ccall(("d_ocp_qp_ipm_arg_codegen", libhpipm), Cvoid,
+        (Cstring, Cstring, Ref{ocp_qp_dim}, Ref{ocp_qp_ipm_arg}),
+        file_name, mode, qp_dim, arg
+    )
+end
 
-struct ocp_qp_ipm_ws
+function ocp_qp_ipm_arg_print(qp_dim::ocp_qp_dim, arg::ocp_qp_ipm_arg)
+    ccall(("d_ocp_qp_ipm_arg_print", libhpipm), Cvoid,
+        (Ref{ocp_qp_dim}, Ref{ocp_qp_ipm_arg}),
+        qp_dim, arg
+    )
+end
+
+mutable struct ocp_qp_ipm_ws
     qp_res::NTuple{4,Cdouble}
     core_workspace::Ptr{Cvoid}
-    dim::Ptr{ocp_qp_dim}
+    dim::Ptr{Cvoid}
     res_workspace::Ptr{Cvoid}
-    sol_step::Ptr{ocp_qp_sol}
-    sol_itref::Ptr{ocp_qp_sol}
-    qp_step::Ptr{ocp_qp}
-    qp_itref::Ptr{ocp_qp}
+    sol_step::Ptr{Cvoid}
+    sol_itref::Ptr{Cvoid}
+    qp_step::Ptr{Cvoid}
+    qp_itref::Ptr{Cvoid}
     res_itref::Ptr{Cvoid}
     res::Ptr{Cvoid}
     Gamma::Ptr{Cvoid}
@@ -127,8 +140,8 @@ struct ocp_qp_ipm_ws
     valid_ric_p::Cint
     memsize::Csize_t
     function ocp_qp_ipm_ws()
-        new((0.0,0.0,0.0,0.0), Ptr{Cvoid}(), Ptr{ocp_qp_dim}(), Ptr{Cvoid}(), 
-            Ptr{ocp_qp_sol}(), Ptr{ocp_qp_sol}(), Ptr{ocp_qp}(), Ptr{ocp_qp}(),
+        new((0.0,0.0,0.0,0.0), Ptr{Cvoid}(), Ptr{Cvoid}(), Ptr{Cvoid}(), 
+            Ptr{Cvoid}(), Ptr{Cvoid}(), Ptr{Cvoid}(), Ptr{Cvoid}(),
             Ptr{Cvoid}(), Ptr{Cvoid}(), Ptr{Cvoid}(), Ptr{Cvoid}(), Ptr{Cvoid}(), 
             Ptr{Cvoid}(), Ptr{Cvoid}(), Ptr{Cvoid}(), Ptr{Cvoid}(), Ptr{Cvoid}(), 
             Ptr{Cvoid}(), Ptr{Cvoid}(), Ptr{Cvoid}(), Ptr{Cvoid}(), Ptr{Cvoid}(), 
@@ -145,13 +158,13 @@ end
 function ocp_qp_ipm_ws_memsize(dim::ocp_qp_dim, arg::ocp_qp_ipm_arg)
     ccall(("d_ocp_qp_ipm_ws_memsize", libhpipm), Csize_t,
         (Ref{ocp_qp_dim},Ref{ocp_qp_ipm_arg}),
-        dim, arg
+        Ref(dim), Ref(arg)
     )
 end
 
 function ocp_qp_ipm_ws_create(dim::ocp_qp_dim, arg::ocp_qp_ipm_arg, ws::ocp_qp_ipm_ws, memory::Vector{UInt8})
-    ccall(("d_ocp_qp_ipm_arg_create", libhpipm), Cvoid,
+    ccall(("d_ocp_qp_ipm_ws_create", libhpipm), Cvoid,
         (Ref{ocp_qp_dim}, Ref{ocp_qp_ipm_arg}, Ref{ocp_qp_ipm_ws}, Ptr{Cvoid}),
-        dim, arg, ws, memory
+        Ref(dim), Ref(arg), Ref(ws), memory
     )
 end

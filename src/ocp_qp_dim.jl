@@ -47,3 +47,17 @@ function ocp_qp_dim_set_all(nx, nu, nbx, nbu, ng, nsbx, nsbu, nsg, dim::ocp_qp_d
         nx, nu, nbx, nbu, ng, nsbx, nsbu, nsg, Ref(dim),
     )  
 end
+
+function ocp_qp_dim_codegen(file_name::String, mode::String, qp_dim::ocp_qp_dim)
+    ccall(("d_ocp_qp_dim_codegen", libhpipm), Cvoid,
+        (Cstring, Cstring, Ref{ocp_qp_dim}),
+        file_name, mode, qp_dim
+    )
+end
+
+function ocp_qp_dim_print(qp_dim::ocp_qp_dim)
+    ccall(("d_ocp_qp_dim_print", libhpipm), Cvoid,
+        (Ref{ocp_qp_dim},),
+        qp_dim
+    )
+end

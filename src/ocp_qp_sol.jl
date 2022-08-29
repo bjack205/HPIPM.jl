@@ -31,3 +31,24 @@ function ocp_qp_sol_create(dim::ocp_qp_dim, qp::ocp_qp_sol{Cdouble}, memory::Vec
         dim, qp, memory
     )
 end
+
+function ocp_qp_sol_get_u(stage, qp_sol, vec::Vector{Cdouble})
+    ccall(("d_ocp_qp_sol_get_u", libhpipm), Cvoid,
+        (Cint, Ref{ocp_qp_sol}, Ref{Cdouble}),
+        stage, qp_sol, vec
+    )
+end
+
+function ocp_qp_sol_get_x(stage, qp_sol, vec::Vector{Cdouble})
+    ccall(("d_ocp_qp_sol_get_x", libhpipm), Cvoid,
+        (Cint, Ref{ocp_qp_sol}, Ref{Cdouble}),
+        stage, qp_sol, vec
+    )
+end
+
+function ocp_qp_sol_get_pi(stage, qp_sol, vec::Vector{Cdouble})
+    ccall(("d_ocp_qp_sol_get_pi", libhpipm), Cvoid,
+        (Cint, Ref{ocp_qp_sol}, Ref{Cdouble}),
+        stage, qp_sol, vec
+    )
+end

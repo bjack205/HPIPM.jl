@@ -9,5 +9,6 @@ include("hpipm_jll.jl")
 include("ocp_qp.jl")
 include("ocp_qp_sol.jl")
 include("ocp_qp_ipm.jl")
+include("ocp_qp_solve.jl")
 
 end
