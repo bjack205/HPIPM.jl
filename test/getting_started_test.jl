@@ -103,7 +103,6 @@ HPIPM.ocp_qp_create(dim, qp, qp_mem)
 HPIPM.ocp_qp_set_all(AA, BB, bb, QQ, SS, RR, qq, rr, iidxbx, llbx, uubx, iidxbu, llbu, uubu, 
   CC, DD, llg, uug, ZZl, ZZu, zzl, zzu, iidxs, llls, llus, qp
 )
-qp.dim
 
 ## QP sol 
 qp_sol_size = HPIPM.ocp_qp_sol_memsize(dim)
