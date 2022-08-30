@@ -1,5 +1,6 @@
 using HPIPM
 using Test
+using LinearAlgebra
 
 include("getting_started_data.jl")
 
@@ -34,7 +35,12 @@ status = HPIPM.getstatus(solver)
 # Get solution
 X = HPIPM.getstates(solver)
 U = HPIPM.getinputs(solver)
+Y = HPIPM.getdynamicsduals(solver)
 @test X[1] ≈ lbx0
+@test norm(reduce(hcat, X) - Xsol', Inf) < 1e-5
+@test norm(reduce(hcat, U[1:end-1]) - Usol', Inf) < 1e-5
+@test norm(reduce(hcat, U[1:end-1]) - Usol', Inf) < 1e-5
+@test norm(reduce(hcat, Y) - Ysol') < 1e-5
 
 # Get stats
 HPIPM.getstat(solver, "obj")

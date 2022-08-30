@@ -57,6 +57,12 @@ The solver options can be set using
 # Solving
 Use the [`solve!`](@ref) method to solve the problem once the data has been specified.
 
+## Getting solve stats
+Use the following methods to get solve statistics
+- [`getstatus`](@ref)
+- [`iterations`](@ref)
+- [`getstat`](@ref)
+
 ## Retrieving the solution
 Once solved, the following methods can be used to query the solution:
 - [`getstatus`](@ref)
@@ -306,6 +312,13 @@ function getstatus(solver::HPIPMSolver)
     ocp_qp_ipm_get_status(solver.ws)
 end
 
+"""
+    iterations(solver)
+
+Number of solver iterations
+"""
+iterations(solver::HPIPMSolver) = getstat(solver, "iter")
+
 #############################################
 ## Getters 
 #############################################
@@ -359,6 +372,7 @@ function getstates!(solver::HPIPMSolver, X)
     for k = 1:N+1
         getstate!(solver, k, X[k])
     end
+    X
 end
 
 """
@@ -372,6 +386,7 @@ function getinputs!(solver::HPIPMSolver, U)
     for k = 1:N+1
         getinput!(solver, k, U[k])
     end
+    U
 end
 
 """
@@ -382,7 +397,6 @@ Return the state trajectory as a vector of vectors.
 function getstates(solver::HPIPMSolver{T}) where T
     X = map(k->zeros(T,ocp_qp_dim_get_nx(solver.dim, k-1)), 1:solver.dim.N+1)
     getstates!(solver, X)
-    X
 end
 
 """
@@ -393,7 +407,27 @@ Return the input trajectory as a vector of vectors.
 function getinputs(solver::HPIPMSolver{T}) where T
     U = map(k->zeros(T,ocp_qp_dim_get_nu(solver.dim, k-1)), 1:solver.dim.N+1) 
     getinputs!(solver, U)
-    U
+end
+
+getdynamicsdual!(solver::HPIPMSolver, k, y) = ocp_qp_sol_get_pi(k-1, solver.sol, y)
+
+function getdynamicsdual(solver::HPIPMSolver{T}, k) where T
+    nx = ocp_qp_dim_get_nx(solver.dim, k)  # next stage
+    y = zeros(T, nx)
+    getdynamicsdual!(solver, k, y)
+    y
+end
+
+function getdynamicsduals!(solver::HPIPMSolver, Y) where T 
+    for k = 1:solver.dim.N
+        getdynamicsdual!(solver, k, Y[k])
+    end
+    Y
+end
+
+function getdynamicsduals(solver::HPIPMSolver{T}) where T 
+    Y = map(k->zeros(T,ocp_qp_dim_get_nx(solver.dim, k)), 1:solver.dim.N) 
+    getdynamicsduals!(solver, Y)
 end
 
 """
