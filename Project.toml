@@ -4,4 +4,5 @@ authors = ["Brian Jackson <bjack205@gmail.com>"]
 version = "0.1.0"
 
 [deps]
+HPIPM_jll = "a3f5a5d1-ecea-5fc4-b93c-6e0d32f58bd0"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"

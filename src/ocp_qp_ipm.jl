@@ -59,10 +59,17 @@ function ocp_qp_ipm_arg_set_default(mode::hpipm_mode, arg::ocp_qp_ipm_arg)
     )
 end
 
-for arg in (
-        :alpha_min, :mu0, :tol_stat, :tol_eq, :tol_ineq, :tol_comp, 
-        :reg_prim, :lam_min, :t_min, :tau_min
-    )
+const OPTIONS_FLOAT = (
+    :alpha_min, :mu0, :tol_stat, :tol_eq, :tol_ineq, :tol_comp, 
+    :reg_prim, :lam_min, :t_min, :tau_min
+)
+
+const OPTIONS_INT = (
+    :iter_max, :warm_start, :pred_corr, :cond_pred_corr, :ric_alg, :comp_dual_sol_eq, :comp_res_pred, 
+    :split_step, :var_init_scheme, :t_lam_min
+)
+
+for arg in OPTIONS_FLOAT 
     method = "ocp_qp_ipm_arg_set_" * string(arg)
     @eval function $(Symbol(method))(value, arg::ocp_qp_ipm_arg)
         ccall(($("d_" * method), libhpipm), Cvoid,
@@ -71,10 +78,7 @@ for arg in (
         )
     end
 end
-for arg in (
-        :iter_max, :warm_start, :pred_corr, :cond_pred_corr, :ric_alg, :comp_dual_sol_eq, :comp_res_pred, 
-        :split_step, :var_init_scheme, :t_lam_min
-    )
+for arg in OPTIONS_INT 
     method = "ocp_qp_ipm_arg_set_" * string(arg)
     @eval function $(Symbol(method))(value, arg::ocp_qp_ipm_arg)
         ccall(($("d_" * method), libhpipm), Cvoid,
@@ -82,6 +86,14 @@ for arg in (
             Ref(Cint(value)), Ref(arg)
         )
     end
+end
+
+const OPTIONS_FLOAT_METHODS = map(OPTIONS_FLOAT) do arg
+    eval(Symbol("ocp_qp_ipm_arg_set_" * string(arg)))
+end
+
+const OPTIONS_INT_METHODS = map(OPTIONS_INT) do arg
+    eval(Symbol("ocp_qp_ipm_arg_set_" * string(arg)))
 end
 
 function ocp_qp_ipm_arg_codegen(file_name::String, mode::String, qp_dim::ocp_qp_dim, arg::ocp_qp_ipm_arg)

@@ -61,3 +61,22 @@ function ocp_qp_dim_print(qp_dim::ocp_qp_dim)
         qp_dim
     )
 end
+
+for field in (:nx, :nu, :nbx, :nbu, :ng, :nsbx, :nsbu, :nsg)
+    setter = "ocp_qp_dim_set_" * string(field)
+    getter = "ocp_qp_dim_get_" * string(field)
+    @eval function $(Symbol(setter))(stage, value, dim::ocp_qp_dim)
+        ccall(($("d_" * setter), libhpipm), Cvoid,
+            (Cint, Cint, Ref{ocp_qp_dim}),
+            stage, value, dim
+        )
+    end
+    @eval function $(Symbol(getter))(dim::ocp_qp_dim, stage)
+        rval = Ref{Cint}()
+        ccall(($("d_" * getter), libhpipm), Cvoid,
+            (Ref{ocp_qp_dim}, Cint, Ref{Cint}),
+            dim, stage, rval
+        )
+        rval[]
+    end
+end

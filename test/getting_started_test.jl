@@ -1,36 +1,7 @@
 using HPIPM
 using Test
 
-N = Cint(5)
-nu = Cint[1,1,1,1,1,0]
-nx = Cint[2,2,2,2,2,2]
-nbu = zeros(Cint,N+1)
-nbx = pushfirst!(zeros(Cint,N), 2)
-ng = zeros(Cint,N+1)
-nsbx = zeros(Cint,N+1)
-nsbu = zeros(Cint,N+1)
-nsg = zeros(Cint,N+1)
-nbue = zeros(Cint,N+1)
-nbxe = zeros(Cint,N+1)
-nge = zeros(Cint,N+1)
-
-A = Float64[1,0,1,1]
-B = Float64[0,1]
-b = Float64[0,0]
-Q = Float64[1,0,0,1]
-R = Float64[1]
-S = Float64[0,0]
-q = Float64[1,1]
-r = Float64[0]
-
-lbx0 = Float64[1,1]
-ubx0 = Float64[1,1]
-idxbx0 = Cint[0,1]
-
-u_guess = Float64[0]
-x_guess = Float64[0,0]
-sl_guess = Float64[]
-su_guess = Float64[]
+include("getting_started_data.jl")
 
 AA = [pointer(A) for i = 1:N]
 BB = [pointer(B) for i = 1:N]
@@ -60,20 +31,6 @@ llls = fill(Ptr{Cdouble}(C_NULL), N+1)
 llus = fill(Ptr{Cdouble}(C_NULL), N+1)
 iidxe = fill(Ptr{Cdouble}(C_NULL), N+1)
 
-# Args
-mode = 1
-iter_max = 30;
-alpha_min = 1e-8;
-mu0 = 1e4;
-tol_stat = 1e-4;
-tol_eq = 1e-5;
-tol_ineq = 1e-5;
-tol_comp = 1e-5;
-reg_prim = 1e-12;
-warm_start = 0;
-pred_corr = 1;
-ric_alg = 0;
-split_step = 1;
 
 ## OCP QP Dim
 str_size = HPIPM.ocp_qp_dim_strsize()
@@ -136,30 +93,16 @@ ipm_mem = zeros(UInt8, ipm_size)
 workspace = HPIPM.ocp_qp_ipm_ws()
 HPIPM.ocp_qp_ipm_ws_create(dim, arg, workspace, ipm_mem)
 
-# ## Codegen
-# HPIPM.ocp_qp_dim_codegen("test_d_ocp_data_jl.c", "w", dim)
-# HPIPM.ocp_qp_codegen("test_d_ocp_data_jl.c", "a", dim, qp)
-# HPIPM.ocp_qp_ipm_arg_codegen("test_d_ocp_data_jl.c", "a", dim, arg)
-
 ## Solve
 HPIPM.ocp_qp_ipm_solve(qp, qp_sol, arg, workspace)
 status = HPIPM.ocp_qp_ipm_get_status(workspace)
-println("Status = ", status)
-workspace.iter
-iters = HPIPM.ocp_qp_ipm_get_iter(workspace)
+@test status == HPIPM.SUCCESS
+@test iters = HPIPM.ocp_qp_ipm_get_iter(workspace) == 3
 obj = HPIPM.ocp_qp_ipm_get_obj(workspace)
-res = HPIPM.ocp_qp_ipm_get_max_res_stat(workspace)
-HPIPM.ocp_qp_ipm_get_obj(workspace)
-println("Got $iters iters in Julia")
-println("Got $obj objective value")
-println("Stat res = $res")
+@test res = HPIPM.ocp_qp_ipm_get_max_res_stat(workspace) < tol_stat
 
-# ##
-# u = zeros(1)
-# HPIPM.ocp_qp_sol_get_u(0, qp_sol, u)
-# u
-# HPIPM.ocp_qp_ipm_get_max_res_stat(workspace)
-# HPIPM.ocp_qp_ipm_get_max_res_eq(workspace)
-# HPIPM.ocp_qp_ipm_get_max_res_ineq(workspace)
-# HPIPM.ocp_qp_ipm_get_max_res_comp(workspace)
-# HPIPM.ocp_qp_ipm_get_obj(workspace)
+## Codegen
+c_filename = joinpath(TMP_DIR, "test_d_ocp_data_jl.c")
+HPIPM.ocp_qp_dim_codegen(c_filename, "w", dim)
+HPIPM.ocp_qp_codegen(c_filename, "a", dim, qp)
+HPIPM.ocp_qp_ipm_arg_codegen(c_filename, "a", dim, arg)

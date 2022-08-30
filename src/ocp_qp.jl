@@ -78,13 +78,13 @@ function ocp_qp_print(qp_dim::ocp_qp_dim, qp::ocp_qp)
 end
 
 function ocp_qp_set_all_zero(qp::ocp_qp)
-    ccall(("d_ocp_q_set_all_zero", libhpipm), Cvoid, (Ref{ocp_qp},), qp)
+    ccall(("d_ocp_qp_set_all_zero", libhpipm), Cvoid, (Ref{ocp_qp},), qp)
 end
 
 for field in (:A, :B, :b, :Q, :S, :R, :q, :r, :lb, :ub, :lbx, :ubx, :lbu, :ubu, :C, :D, 
         :lg, :ug)
     method = "ocp_qp_set_" * string(field)
-    @eval function $(Symbol(method))(stage::Integer, mat::Array{Cdouble}, qp::ocp_qp)
+    @eval function $(Symbol(method * "!"))(stage::Integer, mat::Array{Cdouble}, qp::ocp_qp)
         ccall(($("d_" * method), libhpipm), Cvoid,
             (Cint, Ref{Cdouble}, Ref{ocp_qp}),
             stage, mat, qp
@@ -94,7 +94,7 @@ end
 
 for field in (:idxbx, :idxbu)
     method = "ocp_qp_set_" * string(field)
-    @eval function $(Symbol(method))(stage::Integer, mat::Array{Cint}, qp::ocp_qp)
+    @eval function $(Symbol(method * "!"))(stage::Integer, mat::Array{Cint}, qp::ocp_qp)
         ccall(($("d_" * method), libhpipm), Cvoid,
             (Cint, Ref{Cint}, Ref{ocp_qp}),
             stage, mat, qp

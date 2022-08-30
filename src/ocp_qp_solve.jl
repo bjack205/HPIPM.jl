@@ -16,29 +16,10 @@ function ocp_qp_ipm_get_status(ws::ocp_qp_ipm_ws)
     return HPIPM.hpipm_status(ref[])
 end
 
-# function ocp_qp_ipm_get_iter(ws::ocp_qp_ipm_ws)
-#     val = Cint(0)
-#     rval = Ref(val)
-#     ccall(("d_ocp_qp_ipm_get_iter", libhpipm), Cvoid,
-#         (Ref{ocp_qp_ipm_ws}, Ptr{Cint}),
-#         Ref(ws), rval 
-#     )
-#     println(rval)
-#     println(rval[])
-#     return rval[]
-# end
+const STATS_INT = (:stat_m, :iter)
+const STATS_FLOAT = (:max_res_stat, :max_res_eq, :max_res_ineq, :max_res_comp, :obj)
 
-# function ocp_qp_ipm_get_obj(ws::ocp_qp_ipm_ws)
-#     val = zero(Cdouble)
-#     rval = Ref(val)
-#     ccall(("d_ocp_qp_ipm_get_obj", libhpipm), Cvoid,
-#         (Ref{ocp_qp_ipm_ws}, Ref{Cdouble}),
-#         Ref(ws), rval 
-#     )
-#     return rval[]
-# end
-
-for field in (:stat_m, :iter)
+for field in STATS_INT
     method = "ocp_qp_ipm_get_" * string(field)
     @eval function $(Symbol(method))(ws::ocp_qp_ipm_ws)
         val = zero(Cint)
@@ -48,7 +29,7 @@ for field in (:stat_m, :iter)
     end
 end
 
-for field in (:max_res_stat, :max_res_eq, :max_res_ineq, :max_res_comp, :obj)
+for field in STATS_FLOAT
     method = "ocp_qp_ipm_get_" * string(field)
     @eval function $(Symbol(method))(ws::ocp_qp_ipm_ws)
         val = zero(Cdouble)
@@ -56,4 +37,12 @@ for field in (:max_res_stat, :max_res_eq, :max_res_ineq, :max_res_comp, :obj)
         ccall(($("d_" * method), libhpipm), Cvoid, (Ref{ocp_qp_ipm_ws}, Ref{Cdouble}), ws, rval)
         return rval[]
     end
+end
+
+const STATS_FLOAT_METHODS = map(STATS_FLOAT) do arg
+    eval(Symbol("ocp_qp_ipm_get_" * string(arg)))
+end
+
+const STATS_INT_METHODS = map(STATS_INT) do arg
+    eval(Symbol("ocp_qp_ipm_get_" * string(arg)))
 end
