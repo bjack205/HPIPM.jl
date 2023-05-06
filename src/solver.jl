@@ -97,6 +97,12 @@ struct HPIPMSolver{T}
         ) where T
         N = length(nx) - 1
 
+        nx = convert(Vector{Cint}, nx)
+        nu = convert(Vector{Cint}, nu)
+        nbx = convert(Vector{Cint}, nbx)
+        nbu = convert(Vector{Cint}, nbu)
+        ng = convert(Vector{Cint}, ng)
+
         nsbx = zero(nbx)
         nsbu = zero(nbu)
         nsg = zero(ng)
@@ -138,6 +144,8 @@ struct HPIPMSolver{T}
             dim_mem, qp_mem, sol_mem, ipm_arg_mem, ipm_mem, N)
     end
 end
+
+gethorizonlength(solver::HPIPMSolver) = solver.N + 1
 
 #############################################
 ## Setters
@@ -287,6 +295,24 @@ end
 
 function set_default_options!(solver::HPIPMSolver, mode::hpipm_mode)
     ocp_qp_ipm_arg_set_default(mode, solver.arg)
+end
+
+function set_initial_state!(solver::HPIPMSolver, x0)
+    ocp_qp_set_lbx!(0, x0, solver.qp)
+    ocp_qp_set_ubx!(0, x0, solver.qp)
+    nothing
+end
+
+function set_linear_state_cost(solver::HPIPMSolver, q, kstart, kstop=kstart)
+    for k = kstart:kstop
+        ocp_qp_set_q!(k-1, q, solver.qp)
+    end
+end
+
+function set_linear_input_cost(solver::HPIPMSolver, r, kstart, kstop=kstart)
+    for k = kstart:kstop
+        ocp_qp_set_r!(k-1, r, solver.qp)
+    end
 end
 
 #############################################

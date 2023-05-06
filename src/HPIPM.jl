@@ -1,8 +1,11 @@
 module HPIPM
 
-using HPIPM_jll
+# using HPIPM_jll
 
-const libhpipm = HPIPM_jll.hpipm
+# const libhpipm = HPIPM_jll.hpipm
+# const libhpipm = "/home/brian/Code/hpipm/build/install/lib/libhpipm.so"
+include(joinpath(@__DIR__, "..", "deps", "deps.jl"))
+@assert isfile(libhpipm)
 
 # hpipm wrapper files
 include("hpipm_common.jl")

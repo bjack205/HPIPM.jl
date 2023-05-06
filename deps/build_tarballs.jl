@@ -48,10 +48,13 @@ cmake \
     -D HPIPM_TESTING=OFF \
     ..
 cmake --build . --target install -j${nproc}
+
+install_license ${WORKSPACE}/srcdir/hpipm/LICENSE.txt
 """
 
 # Platforms
 platforms = supported_platforms()
+platforms = [Platform("x86_64", "linux")]
 
 # Products
 products = [

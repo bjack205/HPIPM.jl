@@ -90,6 +90,13 @@ for field in (:A, :B, :b, :Q, :S, :R, :q, :r, :lb, :ub, :lbx, :ubx, :lbu, :ubu, 
             stage, mat, qp
         )
     end
+    getter = "ocp_qp_get_" * string(field)
+    @eval function $(Symbol(getter))(stage::Integer, qp::ocp_qp, mat::Array{Cdouble})
+        ccall(($("d_" * method), libhpipm), Cvoid,
+            (Cint, Ref{ocp_qp}, Ref{Cdouble}),
+            stage, qp, mat
+        )
+    end
 end
 
 for field in (:idxbx, :idxbu)
@@ -98,6 +105,13 @@ for field in (:idxbx, :idxbu)
         ccall(($("d_" * method), libhpipm), Cvoid,
             (Cint, Ref{Cint}, Ref{ocp_qp}),
             stage, mat, qp
+        )
+    end
+    getter = "ocp_qp_get_" * string(field)
+    @eval function $(Symbol(getter))(stage::Integer, qp::ocp_qp, mat::Array{Cint})
+        ccall(($("d_" * method), libhpipm), Cvoid,
+            (Cint, Ref{ocp_qp}, Ref{Cint}),
+            stage, qp, mat
         )
     end
 end

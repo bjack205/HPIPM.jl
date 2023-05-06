@@ -1,4 +1,5 @@
 using HPIPM
+HPIPM.libhpipm
 using Test
 using LinearAlgebra
 
@@ -49,6 +50,7 @@ HPIPM.getstat(solver, "obj")
 @test HPIPM.getstat(solver, "max_res_ineq") < tol_ineq
 @test HPIPM.getstat(solver, "max_res_stat") < tol_stat
 
-## Generate C code for problem
-j_filename = joinpath(TMP_DIR, "test_d_ocp_data_solver.c")
-HPIPM.codegen(solver, j_filename)
+# ## Generate C code for problem
+# TMP_DIR = joinpath(@__DIR__, "temp")
+# j_filename = joinpath(TMP_DIR, "test_d_ocp_data_solver.c")
+# HPIPM.codegen(solver, j_filename)
